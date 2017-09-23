@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Notentegoaplikacja</string>
+
+    <string name="niebieski">NIEBIESKI</string>
+    <string name="czerwony">CZERWONY</string>
+    <string name="zolty">ŻÓŁTY</string>
+    <string name="szary">SZARY</string>
+    <string name="zielony">ZIELONY</string>
 </resources>
