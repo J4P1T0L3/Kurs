@@ -21,12 +21,15 @@
 
         </activity>
         <activity android:name=".Logowanie">
+
+
+        </activity>
+        <activity android:name=".Obrazy">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
     </application>
 
