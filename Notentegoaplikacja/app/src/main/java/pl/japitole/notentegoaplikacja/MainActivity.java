@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         films.add(film3);
         films.add(film4);
         films.add(film5);
-        
+
 
         for (int i = 0; i<films.size(); i++){
             textEx.append("Tytuł " + films.get(i).getTitle() + " oraz chyba ma " + films.get(i).getLenght() + " sezonw" + "\n");
