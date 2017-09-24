@@ -48,7 +48,8 @@
         android:text="Zaloguj"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/haslo"
-        android:background="@color/przycisk"/>
+        android:background="@color/przycisk"
+        android:id="@+id/przycisk"/>
 
 
 </RelativeLayout>

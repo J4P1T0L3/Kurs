@@ -17,6 +17,10 @@
 
         </activity>
         <activity android:name=".Tosty">
+
+
+        </activity>
+        <activity android:name=".Logowanie">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
