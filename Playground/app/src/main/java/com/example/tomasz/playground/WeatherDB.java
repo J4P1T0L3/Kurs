@@ -28,7 +28,7 @@ public class WeatherDB extends SQLiteOpenHelper {
     }
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String Create_Table = "CREATE TABLE " + KEY_WHEATHER + "(" + KEY_CITY + " TEXT," + KEY_DATE + " TEXT," + KEY_TEMP + " REAL," + KEY_OPIS + " TEXT," + KEY_ICONID + " TEXT";
+        String Create_Table = "CREATE TABLE " + KEY_WHEATHER + "(" + KEY_CITY + " TEXT," + KEY_DATE + " TEXT," + KEY_TEMP + " REAL," + KEY_OPIS + " TEXT," + KEY_ICONID + " TEXT)";
         sqLiteDatabase.execSQL(Create_Table);
     }
     @Override
@@ -43,6 +43,7 @@ public class WeatherDB extends SQLiteOpenHelper {
         values.put(KEY_DATE, pogo.getDate());
         values.put(KEY_TEMP, pogo.getTemp());
         values.put(KEY_CITY, pogo.getCity());
+        values.put(KEY_OPIS, pogo.getWeatherGroup());
         values.put(KEY_ICONID, pogo.getIconId());
 
         db.insert(KEY_WHEATHER, null, values);
@@ -55,6 +56,20 @@ public class WeatherDB extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuerty, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                WeatherModel model = new WeatherModel();
+
+                model.setCity(cursor.getString(0));
+                model.setDate(cursor.getString(1));
+                model.setTemp(cursor.getDouble(2));
+                model.setWeatherGroup(cursor.getString(3));
+                model.setIconId(cursor.getString(4));
+
+                repos.add(model);
+            } while (cursor.moveToNext());
+        }
 
         db.close();
         return repos;

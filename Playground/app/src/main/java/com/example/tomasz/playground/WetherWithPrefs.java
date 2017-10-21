@@ -1,8 +1,11 @@
 package com.example.tomasz.playground;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +52,8 @@ public class WetherWithPrefs extends AppCompatActivity implements LoaderManager.
 
     private String unit = "&units=metric";
 
+    WeatherDB db;
+
     public static final int LOADER_ID = 23;
 
     List<WeatherModel> forecast = new LinkedList<>();
@@ -56,6 +62,8 @@ public class WetherWithPrefs extends AppCompatActivity implements LoaderManager.
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_prefs);
+
+        db = new WeatherDB(this);
 
         result = (TextView) findViewById(R.id.result);
         searchET = (EditText) findViewById(R.id.search_et);
@@ -83,30 +91,41 @@ public class WetherWithPrefs extends AppCompatActivity implements LoaderManager.
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String searchQuery = BASE_URL + searchET.getText().toString() + API_KEY + unit;
-                Uri uri = Uri.parse(searchQuery);
-                URL url = null;
-                try {
-                    url = new URL(uri.toString());
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-                if (url != null) {
-                    Bundle queryBundle = new Bundle();
-                    queryBundle.putString("query", url.toString());
-
-                    LoaderManager loaderManager = getSupportLoaderManager();
-                    Loader<String> stringLoader = loaderManager.getLoader(LOADER_ID);
-
-                    if (stringLoader == null) {
-                        loaderManager.initLoader(LOADER_ID, queryBundle, callbacks);
-                    } else {
-                        loaderManager.restartLoader(LOADER_ID, queryBundle, callbacks);
+                if (isNetworkAvailable()) {
+                    String searchQuery = BASE_URL + searchET.getText().toString() + API_KEY + unit;
+                    Uri uri = Uri.parse(searchQuery);
+                    URL url = null;
+                    try {
+                        url = new URL(uri.toString());
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
                     }
+                    if (url != null) {
+                        Bundle queryBundle = new Bundle();
+                        queryBundle.putString("query", url.toString());
+
+                        LoaderManager loaderManager = getSupportLoaderManager();
+                        Loader<String> stringLoader = loaderManager.getLoader(LOADER_ID);
+
+                        if (stringLoader == null) {
+                            loaderManager.initLoader(LOADER_ID, queryBundle, callbacks);
+                        } else {
+                            loaderManager.restartLoader(LOADER_ID, queryBundle, callbacks);
+                        }
+                    }
+                } else {
+                    Toast.makeText(getApplicationContext(), "Nie masz neta", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
+    }
+
+    public boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     @Override
@@ -116,36 +135,41 @@ public class WetherWithPrefs extends AppCompatActivity implements LoaderManager.
 
         String degrees = prefs.getString("degrees", "C");
 
-        if(degrees.equals("C")){
+        if (degrees.equals("C")) {
             unit = "&units=metric";
-        }else if(degrees.equals("F")){
+        } else if (degrees.equals("F")) {
             unit = "&units=imperial";
-        }else if(degrees.equals("K")){
+        } else if (degrees.equals("K")) {
             unit = "&units=default";
         }
 
         String cityString = prefs.getString("city", "Warszawa");
 
-        String searchQuery = BASE_URL + cityString + API_KEY + unit;
-        Uri uri = Uri.parse(searchQuery);
-        URL url = null;
-        try {
-            url = new URL(uri.toString());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        if (url != null) {
-            Bundle queryBundle = new Bundle();
-            queryBundle.putString("query", url.toString());
-
-            LoaderManager loaderManager = getSupportLoaderManager();
-            Loader<String> stringLoader = loaderManager.getLoader(LOADER_ID);
-
-            if (stringLoader == null) {
-                loaderManager.initLoader(LOADER_ID, queryBundle, this);
-            } else {
-                loaderManager.restartLoader(LOADER_ID, queryBundle, this);
+        if (isNetworkAvailable()) {
+            String searchQuery = BASE_URL + cityString + API_KEY + unit;
+            Uri uri = Uri.parse(searchQuery);
+            URL url = null;
+            try {
+                url = new URL(uri.toString());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
             }
+            if (url != null) {
+                Bundle queryBundle = new Bundle();
+                queryBundle.putString("query", url.toString());
+
+                LoaderManager loaderManager = getSupportLoaderManager();
+                Loader<String> stringLoader = loaderManager.getLoader(LOADER_ID);
+
+                if (stringLoader == null) {
+                    loaderManager.initLoader(LOADER_ID, queryBundle, this);
+                } else {
+                    loaderManager.restartLoader(LOADER_ID, queryBundle, this);
+                }
+            }
+        } else {
+            adapter = new WeatherAdapter(this, db.getAllRepos());
+            recycler.setAdapter(adapter);
         }
     }
 
@@ -187,6 +211,9 @@ public class WetherWithPrefs extends AppCompatActivity implements LoaderManager.
         result.setVisibility(View.VISIBLE);
         if (data != null && !data.equals("")) {
             result.setText("");
+
+            db.clearRepos();
+
             forecast.clear();
             try {
                 JSONObject in = new JSONObject(data);
@@ -208,7 +235,9 @@ public class WetherWithPrefs extends AppCompatActivity implements LoaderManager.
                     String weatherGroup = weath.getJSONObject(0).getString("main");
                     String iconId = weath.getJSONObject(0).getString("icon");
 
-                    forecast.add(new WeatherModel(city, date.toString(), temp, weatherGroup, iconId));
+                    WeatherModel w = new WeatherModel(city, date.toString(), temp, weatherGroup, iconId);
+                    forecast.add(w);
+                    db.addRepo(w);
                 }
                 adapter = new WeatherAdapter(getApplicationContext(), forecast);
                 recycler.setAdapter(adapter);
