@@ -15,6 +15,10 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,7 +46,6 @@ public class WetherWithPrefs extends AppCompatActivity implements LoaderManager.
     private TextView result;
     private EditText searchET;
     private Button searchBtn;
-    private Button settings;
     private ProgressBar progressBar;
     private RecyclerView recycler;
     private WeatherAdapter adapter;
@@ -59,16 +62,34 @@ public class WetherWithPrefs extends AppCompatActivity implements LoaderManager.
     List<WeatherModel> forecast = new LinkedList<>();
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.settings){
+            Intent intent = new Intent(getApplicationContext(), Settings.class);
+            startActivity(intent);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+
+        return true;
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_prefs);
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         db = new WeatherDB(this);
 
         result = (TextView) findViewById(R.id.result);
         searchET = (EditText) findViewById(R.id.search_et);
         searchBtn = (Button) findViewById(R.id.search_btn);
-        settings = (Button) findViewById(R.id.settings);
         progressBar = (ProgressBar) findViewById(R.id.progress);
         recycler = (RecyclerView) findViewById(R.id.recycler);
 
@@ -80,13 +101,6 @@ public class WetherWithPrefs extends AppCompatActivity implements LoaderManager.
 
         getSupportLoaderManager().initLoader(LOADER_ID, null, callbacks);
 
-        settings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), Settings.class);
-                startActivity(intent);
-            }
-        });
 
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
