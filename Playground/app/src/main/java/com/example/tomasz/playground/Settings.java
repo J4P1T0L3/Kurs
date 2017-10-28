@@ -1,10 +1,14 @@
 package com.example.tomasz.playground;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Layout;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,10 +24,10 @@ public class Settings extends AppCompatActivity {
     private Button cel;
     private Button far;
     private Button kal;
-    private Button change;
+    private Button changecitybutton;
     private TextView deg;
     private TextView city;
-    private EditText cityEt;
+    private Boolean czyCosZmieniono = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -33,42 +37,63 @@ public class Settings extends AppCompatActivity {
         cel = (Button) findViewById(R.id.cel);
         far = (Button) findViewById(R.id.far);
         kal = (Button) findViewById(R.id.kal);
-        change = (Button) findViewById(R.id.change);
+        changecitybutton = (Button) findViewById(R.id.zmienmiasto);
         deg = (TextView) findViewById(R.id.deg);
         city = (TextView) findViewById(R.id.city);
-        cityEt = (EditText) findViewById(R.id.city_et);
 
         cel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveDegrees("C");
+                deg.setText("C");
+                czyCosZmieniono = true;
             }
         });
 
         far.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveDegrees("F");
+                deg.setText("F");
+                czyCosZmieniono = true;
             }
         });
 
         kal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveDegrees("K");
+                deg.setText("K");
+                czyCosZmieniono = true;
             }
         });
 
-        change.setOnClickListener(new View.OnClickListener() {
+        changecitybutton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                if (cityEt.getText().toString().isEmpty()) {
-                    cityEt.setError("Miasto nie może byc puste");
-                } else {
-                    cityEt.setError(null);
-                    saveCity(cityEt.getText().toString());
-                    cityEt.setText("");
-                }
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(Settings.this);
+                LayoutInflater inflater = Settings.this.getLayoutInflater();
+                View dialogview = inflater.inflate(R.layout.alert, null);
+                builder.setView(dialogview);
+
+                final AlertDialog alertDialog = builder.create();
+
+                final EditText editText = (EditText) dialogview.findViewById(R.id.miastoedittext);
+                Button button = (Button) dialogview.findViewById(R.id.potwierdzalert);
+
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (editText.getText().toString().isEmpty()) {
+                            editText.setError("Miasto nie może byc puste");
+                        } else {
+                            editText.setError(null);
+                            city.setText(editText.getText().toString());
+                            czyCosZmieniono = true;
+                            editText.setText("");
+                            alertDialog.dismiss();
+                        }
+
+                    }
+                });
+                alertDialog.show();
             }
         });
 
@@ -90,10 +115,6 @@ public class Settings extends AppCompatActivity {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("degrees", degrees);
         editor.commit();
-
-        deg.setText(degrees);
-
-        Toast.makeText(getApplicationContext(), "Zmieniono", Toast.LENGTH_SHORT).show();
     }
 
     public void saveCity(String cityToChange) {
@@ -102,8 +123,31 @@ public class Settings extends AppCompatActivity {
         editor.putString("city", cityToChange);
         editor.commit();
 
-        city.setText(cityToChange);
+    }
 
-        Toast.makeText(getApplicationContext(), "Zmieniono", Toast.LENGTH_SHORT).show();
+    @Override
+    public void onBackPressed() {
+        if (czyCosZmieniono == true) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(Settings.this);
+            builder.setTitle("Zmieniono Ustawienia");
+            builder.setMessage("Czy chcesz zapisać zmiany?");
+            builder.setPositiveButton("Tak", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    saveCity(city.getText().toString());
+                    saveDegrees(deg.getText().toString());
+                    Settings.super.onBackPressed();
+                }
+            });
+            builder.setNegativeButton("Nie", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Settings.super.onBackPressed();
+                }
+            });
+            builder.show();
+        } else {
+            Settings.super.onBackPressed();
+        }
     }
 }
