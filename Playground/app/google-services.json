@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "179195784833",
+    "firebase_url": "https://kanapka-24b60.firebaseio.com",
+    "project_id": "kanapka-24b60",
+    "storage_bucket": "kanapka-24b60.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:179195784833:android:4f8a118d5360bba5",
+        "android_client_info": {
+          "package_name": "com.example.tomasz.playground"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "179195784833-0ou097lm5ljeubked6g523aottopephi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpZae4lZTtQMi3et9awdgtao60Me43C4M"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

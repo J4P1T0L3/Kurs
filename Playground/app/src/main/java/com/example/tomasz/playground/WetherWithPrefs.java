@@ -76,6 +76,7 @@ public class WetherWithPrefs extends AppCompatActivity {
         tabLayout.addTab(tabLayout.newTab().setText("Twoje Miasto"));
         tabLayout.addTab(tabLayout.newTab().setText("Wyszukaj Miasto"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+        startService(new Intent(this, FCMService.class));
 
         pager=(ViewPager) findViewById(R.id.viewpager);
 
