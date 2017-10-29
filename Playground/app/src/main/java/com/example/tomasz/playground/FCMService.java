@@ -1,6 +1,8 @@
 package com.example.tomasz.playground;
 
 import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.support.v4.app.NotificationCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -21,8 +23,12 @@ public class FCMService extends FirebaseMessagingService {
 
         builder.setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(remoteMessage.getNotification().getTitle())
-                .setContentTitle(remoteMessage.getNotification().getBody())
+                .setContentText(remoteMessage.getNotification().getBody())
                 .setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(10, builder.build());
 
     }
 }
